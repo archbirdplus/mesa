@@ -1475,6 +1475,7 @@ zink_buffer_map(struct pipe_context *pctx,
          u_upload_alloc(mgr, 0, box->width,
                      screen->info.props.limits.minMemoryMapAlignment, &offset,
                      (struct pipe_resource **)&trans->staging_res, (void **)&ptr);
+         assert(trans->staging_res);
          res = zink_resource(trans->staging_res);
          trans->offset = offset;
          usage |= PIPE_MAP_UNSYNCHRONIZED;
