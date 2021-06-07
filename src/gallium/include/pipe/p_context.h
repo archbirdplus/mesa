@@ -1185,6 +1185,13 @@ struct pipe_context {
                                                                    const struct pipe_video_buffer *templat,
                                                                    const uint64_t *modifiers,
                                                                    unsigned int modifiers_count);
+
+   /**
+    * Inform the driver that states are invalidated,
+    * meaning that the next state to update will proceed according to
+    * gallium atom ordering.
+    */
+    void (*set_prediction_mode)(struct pipe_context *context, bool enable_prediction);
 };
 
 
