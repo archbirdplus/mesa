@@ -363,6 +363,7 @@ struct zink_context {
    bool first_frame_done;
 
    bool gfx_dirty;
+   bool prediction;
 
    bool is_device_lost;
    bool primitive_restart;
