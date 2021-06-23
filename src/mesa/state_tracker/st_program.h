@@ -304,7 +304,7 @@ st_translate_stream_output_info(struct gl_program *prog);
 extern void
 st_serialize_nir(struct gl_program *stp);
 
-extern void
+extern void *
 st_finalize_program(struct st_context *st, struct gl_program *prog);
 
 struct pipe_shader_state *
