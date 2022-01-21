@@ -57,6 +57,9 @@ class Node:
         self.visit(pretty_printer)
         return stream.getvalue()
 
+    def __hash__(self):
+        raise NotImplementedError
+
 
 class Literal(Node):
     
@@ -65,6 +68,9 @@ class Literal(Node):
 
     def visit(self, visitor):
         visitor.visit_literal(self)
+
+    def __hash__(self):
+        return hash(self.value)
 
 
 class Blob(Node):
@@ -78,6 +84,9 @@ class Blob(Node):
     def visit(self, visitor):
         visitor.visit_blob(self)
 
+    def __hash__(self):
+        return hash(self.value)
+
 
 class NamedConstant(Node):
     
@@ -86,6 +95,9 @@ class NamedConstant(Node):
 
     def visit(self, visitor):
         visitor.visit_named_constant(self)
+
+    def __hash__(self):
+        return hash(self.name)
     
 
 class Array(Node):
@@ -95,6 +107,12 @@ class Array(Node):
 
     def visit(self, visitor):
         visitor.visit_array(self)
+
+    def __hash__(self):
+        tmp = 0
+        for mobj in self.elements:
+            tmp = tmp ^ hash(mobj)
+        return tmp
 
 
 class Struct(Node):
@@ -106,7 +124,13 @@ class Struct(Node):
     def visit(self, visitor):
         visitor.visit_struct(self)
 
-        
+    def __hash__(self):
+        tmp = hash(self.name)
+        for mname, mobj in self.members:
+            tmp = tmp ^ hash(mname) ^ hash(mobj)
+        return tmp
+
+
 class Pointer(Node):
 
     ptr_ignore_list = ["ret", "elem"]
@@ -149,6 +173,9 @@ class Pointer(Node):
     def visit(self, visitor):
         visitor.visit_pointer(self)
 
+    def __hash__(self):
+        return hash(self.pname)
+
 
 class Call:
     
@@ -159,9 +186,20 @@ class Call:
         self.args = args
         self.ret = ret
         self.time = time
+
+        # Calculate hashvalue "cached" into a variable
+        self.hashvalue = hash(self.klass) ^ hash(self.method)
+        for mname, mobj in self.args:
+            self.hashvalue = self.hashvalue ^ hash(mname) ^ hash(mobj)
         
     def visit(self, visitor):
         visitor.visit_call(self)
+
+    def __hash__(self):
+        return self.hashvalue
+
+    def __eq__(self, other):
+        return self.hashvalue == other.hashvalue
 
 
 class Trace:
