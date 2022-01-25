@@ -137,7 +137,6 @@ class Pointer(Node):
 
     def __init__(self, state, address, pname):
         self.address = address
-        self.pname = pname
         self.state = state
 
         # Check if address exists in list and if it is a return value address
@@ -174,7 +173,7 @@ class Pointer(Node):
         visitor.visit_pointer(self)
 
     def __hash__(self):
-        return hash(self.pname)
+        return hash(self.named_address())
 
 
 class Call:
