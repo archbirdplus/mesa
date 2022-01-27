@@ -134,41 +134,41 @@ class PKKPrettyPrinter(PrettyPrinter):
 
     def visit_literal(self, node):
         if node.value is None:
-            self.literal('NULL')
+            self.literal("NULL")
         elif isinstance(node.value, str):
             self.literal('"' + node.value + '"')
         else:
             self.literal(repr(node.value))
 
     def visit_blob(self, node):
-        self.address('blob()')
+        self.address("blob()")
 
     def visit_named_constant(self, node):
         self.literal(node.name)
 
     def visit_array(self, node):
-        self.text('{')
-        sep = ''
+        self.text("{")
+        sep = ""
         for value in node.elements:
             self.text(sep)
-            if sep != '':
+            if sep != "":
                 self.newline()
             value.visit(self)
-            sep = ', '
-        self.text('}')
+            sep = ", "
+        self.text("}")
 
     def visit_struct(self, node):
-        self.text('{')
-        sep = ''
+        self.text("{")
+        sep = ""
         for name, value in node.members:
             self.text(sep)
-            if sep != '':
+            if sep != "":
                 self.newline()
             self.variable(name)
-            self.text(' = ')
+            self.text(" = ")
             value.visit(self)
-            sep = ', '
-        self.text('}')
+            sep = ", "
+        self.text("}")
 
     def visit_pointer(self, node):
         if self.options.named_ptrs:
@@ -178,36 +178,36 @@ class PKKPrettyPrinter(PrettyPrinter):
 
     def visit_call(self, node):
         if not self.options.suppress_variants:
-            self.text(f'[{node.no:8d}] ')
+            self.text(f"[{node.no:8d}] ")
 
         if node.klass != None:
-            self.function(node.klass + '::' + node.method)
+            self.function(node.klass +"::"+ node.method)
         else:
             self.function(node.method)
 
         if not self.options.method_only or self.show_args:
-            self.text('(')
+            self.text("(")
             if len(node.args):
                 self.newline()
-                sep = ''
+                sep = ""
                 for name, value in node.args:
                     self.text(sep)
-                    if sep != '':
+                    if sep != "":
                         self.newline()
                     self.variable(name)
-                    self.text(' = ')
+                    self.text(" = ")
                     value.visit(self)
-                    sep = ', '
+                    sep = ", "
                 self.newline()
 
-            self.text(')')
+            self.text(")")
 
             if node.ret is not None:
-                self.text(' = ')
+                self.text(" = ")
                 node.ret.visit(self)
 
         if not self.options.suppress_variants and node.time is not None:
-            self.text(' // time ')
+            self.text(" // time ")
             node.time.visit(self)
 
 
@@ -368,10 +368,9 @@ if __name__ == "__main__":
         # Print out the block
         ncall1 = start1
         ncall2 = start2
+        last1 = last2 = False
         while True:
-            prev1 = ncall1
-            prev2 = ncall2
-
+            # Get line data
             if ncall1 < end1:
                 printer.entry_start(show_args)
                 stack1[ncall1].visit(printer)
@@ -379,6 +378,7 @@ if __name__ == "__main__":
                 ncall1 += 1
             else:
                 data1 = []
+                last1 = True
 
             if ncall2 < end2:
                 printer.entry_start(show_args)
@@ -387,12 +387,15 @@ if __name__ == "__main__":
                 ncall2 += 1
             else:
                 data2 = []
+                last2 = True
 
-            if prev1 == ncall1 and prev2 == ncall2:
+            # Check if we are at last call of both
+            if last1 and last2:
                 break
 
             nline = 0
             while nline < len(data1) or nline < len(data2):
+                # Determine line start indentation
                 if nline > 0:
                     if options.suppress_variants:
                         indent = " "*8
@@ -403,12 +406,15 @@ if __name__ == "__main__":
 
                 line1 = pkk_get_line(data1, nline)
                 line2 = pkk_get_line(data2, nline)
+
+                # Highlight differing lines if not plain
                 if not options.plain and line1 != line2:
                     if tag == "insert" or tag == "delete":
                         ansi_1 = ansi_1 + PKK_ANSI_ESC + PKK_ANSI_BOLD
                     elif tag == "replace":
                         ansi_1 = ansi_2 = ansi_1 + PKK_ANSI_ESC + PKK_ANSI_YELLOW
 
+                # Output line
                 print(colfmt.format(
                     ansi_1, pkk_format_line(line1, indent, colwidth), ansi_end,
                     ansi_sep, sep, ansi_end,
