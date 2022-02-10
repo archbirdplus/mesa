@@ -557,6 +557,7 @@ void trace_dump_sampler_view_template(const struct pipe_sampler_view *state,
 
    trace_dump_struct_begin("pipe_sampler_view");
 
+   trace_dump_member(int, state, target);
    trace_dump_member(format, state, format);
    trace_dump_member(ptr, state, texture);
 
