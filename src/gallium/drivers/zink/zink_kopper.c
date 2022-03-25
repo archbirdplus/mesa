@@ -602,7 +602,8 @@ kopper_present(void *data, void *gdata, int thread_idx)
     * normal cmdbuf submit/signal and then also exists here when it's needed for the present operation
     */
    struct util_dynarray *arr;
-   for (; screen->last_finished && cdt->swapchain->last_present_prune != screen->last_finished; cdt->swapchain->last_present_prune++) {
+   uint32_t last_finished = screen->last_finished % UINT32_MAX;
+   for (; last_finished && cdt->swapchain->last_present_prune < last_finished; cdt->swapchain->last_present_prune++) {
       struct hash_entry *he = _mesa_hash_table_search(cdt->swapchain->presents,
                                                       (void*)(uintptr_t)cdt->swapchain->last_present_prune);
       if (he) {
@@ -616,7 +617,7 @@ kopper_present(void *data, void *gdata, int thread_idx)
    }
    /* queue this wait semaphore for deletion on completion of the next batch */
    assert(screen->curr_batch > 0);
-   uint32_t next = screen->curr_batch + 1;
+   uint32_t next = last_finished + 1;
    struct hash_entry *he = _mesa_hash_table_search(cdt->swapchain->presents, (void*)(uintptr_t)next);
    if (he)
       arr = he->data;

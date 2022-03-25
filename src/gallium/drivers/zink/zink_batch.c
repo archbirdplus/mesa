@@ -372,12 +372,6 @@ submit_queue(void *data, void *gdata, int thread_index)
    bs->usage.usage = bs->fence.batch_id;
    bs->usage.unflushed = false;
 
-   if (screen->last_finished > bs->fence.batch_id && bs->fence.batch_id == 1) {
-      if (!zink_screen_init_semaphore(screen)) {
-         debug_printf("timeline init failed, things are about to go dramatically wrong.");
-      }
-   }
-
    uint64_t batch_id = bs->fence.batch_id;
    /* first submit is just for acquire waits since they have a separate array */
    si[0].sType = si[1].sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
