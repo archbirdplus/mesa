@@ -711,6 +711,7 @@ zink_bind_rasterizer_state(struct pipe_context *pctx, void *cso)
          zink_set_fs_point_coord_key(ctx);
       if (ctx->rast_state->base.scissor != scissor)
          ctx->scissor_changed = true;
+      zink_update_fs_key_samples(ctx);
 
       if (ctx->rast_state->base.force_persample_interp != force_persample_interp)
          zink_set_fs_key(ctx)->force_persample_interp = ctx->rast_state->base.force_persample_interp;

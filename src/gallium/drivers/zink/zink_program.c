@@ -1028,7 +1028,8 @@ zink_update_fs_key_samples(struct zink_context *ctx)
    nir_shader *nir = ctx->gfx_stages[PIPE_SHADER_FRAGMENT]->nir;
    if (nir->info.outputs_written & (1 << FRAG_RESULT_SAMPLE_MASK)) {
       bool samples = zink_get_fs_key(ctx)->samples;
-      if (samples != (ctx->fb_state.samples > 1))
+      bool ms_state = ctx->rast_state && ctx->rast_state->base.multisample;
+      if (samples != ((ctx->fb_state.samples > 1) && ms_state))
          zink_set_fs_key(ctx)->samples = ctx->fb_state.samples > 1;
    }
 }
