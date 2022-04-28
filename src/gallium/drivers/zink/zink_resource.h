@@ -159,6 +159,7 @@ struct zink_resource {
 
    uint8_t modifiers_count;
    uint64_t *modifiers;
+   enum pipe_format drm_format;
 };
 
 struct zink_transfer {
