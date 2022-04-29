@@ -90,6 +90,7 @@ struct zink_screen {
    uint64_t last_finished;
    VkSemaphore sem;
    struct util_queue flush_queue;
+   struct zink_context *copy_context;
 
    unsigned buffer_rebind_counter;
 
