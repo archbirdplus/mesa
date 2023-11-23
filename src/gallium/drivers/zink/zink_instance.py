@@ -38,6 +38,7 @@ EXTENSIONS = [
     Extension("VK_EXT_debug_utils"),
     Extension("VK_KHR_get_physical_device_properties2"),
     Extension("VK_KHR_external_memory_capabilities"),
+    Extension("VK_KHR_portability_enumeration"),
     Extension("VK_MVK_moltenvk",
         nonstandard=True),
     Extension("VK_KHR_surface"),
@@ -236,6 +237,7 @@ zink_create_instance(struct zink_instance_info *instance_info)
 
    VkInstanceCreateInfo ici = {0};
    ici.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+   ici.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
    ici.pApplicationInfo = &ai;
    ici.ppEnabledExtensionNames = extensions;
    ici.enabledExtensionCount = num_extensions;

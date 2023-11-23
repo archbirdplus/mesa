@@ -1953,7 +1953,7 @@ zink_get_sparse_texture_virtual_page_size(struct pipe_screen *pscreen,
    }
 
    return 1;
-hack_it_up:
+hack_it_up:;
    const int (*page_sizes)[3] = target == PIPE_TEXTURE_3D ? page_size_3d : page_size_2d;
    int blk_size = util_format_get_blocksize(pformat);
 
