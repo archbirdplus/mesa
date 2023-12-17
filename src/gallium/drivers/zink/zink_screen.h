@@ -243,12 +243,8 @@ struct mem_cache_entry {
    void *map;
 };
 
-static inline void breakpoint_VKSCR(char *str) {
-    printf("Vk call: %s\n", str);
-}
-
-#define VKCTX(fn) (breakpoint_VKSCR(#fn), zink_screen(ctx->base.screen)->vk.fn)
-#define VKSCR(fn) (breakpoint_VKSCR(#fn), screen->vk.fn)
+#define VKCTX(fn) zink_screen(ctx->base.screen)->vk.fn
+#define VKSCR(fn) screen->vk.fn
 
 VkFormat
 zink_get_format(struct zink_screen *screen, enum pipe_format format);

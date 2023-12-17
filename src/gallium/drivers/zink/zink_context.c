@@ -2130,12 +2130,6 @@ equals_framebuffer_imageless(const void *a, const void *b)
    return memcmp(a, b, offsetof(struct zink_framebuffer_state, infos) + sizeof(s->infos[0]) * s->num_attachments) == 0;
 }
 
-// TODO: Figure out who initializes these cbufs (pipe_surface*)
-// Whoever creates them forgets to have them connected to their swapchain!
-// zink_context_create?
-// zink_surface_create?
-// zink_surface_swapchain_update?
-
 static void
 setup_framebuffer(struct zink_context *ctx)
 {
@@ -2176,7 +2170,7 @@ setup_framebuffer(struct zink_context *ctx)
    for (unsigned i = 0; i < ctx->fb_state.nr_cbufs; i++) {
       if (!ctx->fb_state.cbufs[i])
          continue;
-      struct zink_resource *res = zink_resource(ctx->fb_state.cbufs[i]->texture); // TODO: figure out where texture comes from
+      struct zink_resource *res = zink_resource(ctx->fb_state.cbufs[i]->texture);
       if (zink_is_swapchain(res)) {
          has_swapchain = true;
          if (zink_kopper_acquire(ctx, res, UINT64_MAX))

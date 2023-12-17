@@ -56,7 +56,6 @@ init_dt_type(struct kopper_displaytarget *cdt)
     }
 }
 
-// Random code with 4-space indents?
 static VkSurfaceKHR
 kopper_CreateSurface(struct zink_screen *screen, struct kopper_displaytarget *cdt)
 {
@@ -68,8 +67,9 @@ kopper_CreateSurface(struct zink_screen *screen, struct kopper_displaytarget *cd
     switch (type) {
 #ifdef VK_USE_PLATFORM_XCB_KHR
     case VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR:
-       // cdt.info.xcb is a VkXcbSurfaceCreateInfoKHR
-       printf("my func is %i\n", VKSCR(CreateXcbSurfaceKHR));
+       if (!VKSCR(CreateXcbSurfaceKHR)) {
+          mesa_loge("zink: Vulkan does not support XCB surface");
+       }
        error = VKSCR(CreateXcbSurfaceKHR)(screen->instance, &cdt->info.xcb, NULL, &surface);
        break;
 #endif
@@ -314,8 +314,6 @@ update_swapchain(struct zink_screen *screen, struct kopper_displaytarget *cdt, u
    return kopper_GetSwapchainImages(screen, cdt->swapchain);
 }
 
-// Initializes cdt->info with loader_private
-
 struct kopper_displaytarget *
 zink_kopper_displaytarget_create(struct zink_screen *screen, unsigned tex_usage,
                                  enum pipe_format format, unsigned width,
@@ -325,7 +323,6 @@ zink_kopper_displaytarget_create(struct zink_screen *screen, unsigned tex_usage,
    struct kopper_displaytarget *cdt;
    const struct kopper_loader_info *info = loader_private;
 
-   // Create a copy of cdt to find cdt in the cache via its hash???
    {
       struct kopper_displaytarget k;
       struct hash_entry *he = NULL;

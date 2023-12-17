@@ -1024,7 +1024,6 @@ resource_create(struct pipe_screen *pscreen,
    if (loader_private) {
       if (templ->bind & PIPE_BIND_DISPLAY_TARGET) {
          /* backbuffer */
-         // Resource object depends on loader_private to create a display target (backbuffer) for the object - it is a VkXcbSurfaceInfo
          res->obj->dt = zink_kopper_displaytarget_create(screen,
                                                          res->base.b.bind,
                                                          res->base.b.format,
@@ -1035,7 +1034,6 @@ resource_create(struct pipe_screen *pscreen,
          assert(res->obj->dt);
       } else {
          /* frontbuffer */
-         // loader_private is another image from the same swapchain (maybe dt needs to be cached)
          struct zink_resource *back = (void*)loader_private;
          struct kopper_displaytarget *cdt = back->obj->dt;
          cdt->refcount++;

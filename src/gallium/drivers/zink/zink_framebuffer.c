@@ -48,19 +48,16 @@ zink_destroy_framebuffer(struct zink_screen *screen,
    ralloc_free(fb);
 }
 
-/* TODO This is not where I shall add my VkPresentQueue, this requires existing images */
-
 void
 zink_init_framebuffer(struct zink_screen *screen, struct zink_framebuffer *fb, struct zink_render_pass *rp)
 {
-   VkFramebuffer ret; // Framebuffer to create
+   VkFramebuffer ret;
 
    if (fb->rp == rp)
       return;
 
    uint32_t hash = _mesa_hash_pointer(rp);
 
-   // If hash entry for the fb already exists, goto out
    struct hash_entry *he = _mesa_hash_table_search_pre_hashed(&fb->objects, hash, rp);
    if (he) {
 #if defined(_WIN64) || defined(__x86_64__)
@@ -91,12 +88,10 @@ zink_init_framebuffer(struct zink_screen *screen, struct zink_framebuffer *fb, s
    attachments.pAttachmentImageInfos = fb->infos;
    fci.pNext = &attachments;
 
-   // Interesting, https://vulkan-tutorial.com/Drawing_a_triangle/Drawing/Framebuffers
-   // has &ret replaced by &swapChainFramebuffers[i], creating framebuffers for each image view
    if (VKSCR(CreateFramebuffer)(screen->dev, &fci, NULL, &ret) != VK_SUCCESS)
       return;
 #if defined(_WIN64) || defined(__x86_64__)
-   _mesa_hash_table_insert_pre_hashed(&fb->objects, hash, rp, ret); // Cache it
+   _mesa_hash_table_insert_pre_hashed(&fb->objects, hash, rp, ret);
 #else
    VkFramebuffer *ptr = ralloc(fb, VkFramebuffer);
    if (!ptr) {
