@@ -124,6 +124,8 @@ init_surface_info(struct zink_surface *surface, struct zink_resource *res, VkIma
    surface->info_hash = _mesa_hash_data(&surface->info, sizeof(surface->info));
 }
 
+// This is where dt comes from- why does it need res->obj->dt?
+
 static struct zink_surface *
 create_surface(struct pipe_context *pctx,
                struct pipe_resource *pres,
@@ -243,6 +245,8 @@ wrap_surface(struct pipe_context *pctx, struct pipe_surface *psurf)
    return &csurf->base;
 }
 
+// TODO: Should res have obj->dt?
+
 static struct pipe_surface *
 zink_create_surface(struct pipe_context *pctx,
                     struct pipe_resource *pres,
@@ -257,6 +261,7 @@ zink_create_surface(struct pipe_context *pctx,
    struct pipe_surface *psurf = NULL;
    if (res->obj->dt) {
       /* don't cache swapchain surfaces. that's weird. */
+      // Creates surface for the swapchain?
       struct zink_surface *surface = do_create_surface(pctx, pres, templ, &ivci, 0, false);
       if (surface) {
          surface->is_swapchain = true;

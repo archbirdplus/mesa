@@ -65,6 +65,7 @@ and create a window, you must do the following to use the X/Mesa interface:
 #include "frontend/xlibsw_api.h"
 
 # include <X11/Xlib.h>
+# include <X11/Xlib-xcb.h>
 # include <X11/Xlibint.h>
 # include <X11/Xutil.h>
 

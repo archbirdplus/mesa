@@ -91,6 +91,9 @@ sw_screen_create_vk(struct sw_winsys *winsys, const struct pipe_screen_config *c
 #if defined(GALLIUM_ASAHI)
       (sw_vk || only_sw) ? "" : "asahi",
 #endif
+#if defined(GALLIUM_ZINK)
+      "zink", // sw_vk is not found at all in wgl, idk how to it translates
+#endif
 #if defined(GALLIUM_LLVMPIPE)
       "llvmpipe",
 #endif

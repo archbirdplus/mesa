@@ -32,6 +32,10 @@
 #include "util/u_atomic.h"
 #include "util/u_memory.h"
 
+#ifdef GALLIUM_ZINK
+#include "kopper_interface.h"
+#endif
+
 struct xmesa_st_framebuffer {
    XMesaDisplay display;
    XMesaBuffer buffer;
@@ -111,6 +115,25 @@ xmesa_st_framebuffer_copy_textures(struct st_framebuffer_iface *stfbi,
                                  src_ptex, 0, &src_box);
 }
 
+#if GALLIUM_ZINK
+xmesa_st_fill_private_loader_data(struct xmesa_st_framebuffer *xstfb, struct kopper_loader_info *out) {
+   out->xcb.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
+   out->xcb.pNext = NULL;
+   out->xcb.flags = 0;
+   Display *dpy = xstfb->display->display;
+   // First element of the private struct, at least at
+   // https://opensource.apple.com/source/X11libs/X11libs-60.1/libX11/libX11-1.4.3/src/Xxcbint.h.auto.html
+   out->xcb.connection = (xcb_connection_t *)dpy->xcb; // XGetXCBConnection(dpy);
+   int i = DefaultScreen(dpy);
+   Window win = RootWindow(dpy, i);
+   assert(dpy);
+   assert(win);
+   out->xcb.connection = (xcb_window_t)win;
+   XWindowAttributes attr;
+   XGetWindowAttributes(dpy, win, &attr);
+   out->has_alpha = false; // TODO: check alpha
+}
+#endif
 
 /**
  * Remove outdated textures and create the requested ones.
@@ -175,8 +198,37 @@ xmesa_st_framebuffer_validate_textures(struct st_framebuffer_iface *stfbi,
          templ.format = format;
          templ.bind = bind;
 
-         xstfb->textures[i] =
-            xstfb->screen->resource_create(xstfb->screen, &templ);
+// Rather direct copy of stw_st.c
+#ifdef GALLIUM_ZINK
+         if (
+            // xstfb->zink &&
+            i < ST_ATTACHMENT_DEPTH_STENCIL &&
+            xstfb->screen->resource_create_drawable) {
+
+            struct kopper_loader_info loader_info;
+            void *data;
+
+            if (bind & PIPE_BIND_DISPLAY_TARGET) {
+               xmesa_st_fill_private_loader_data(xstfb, &loader_info);
+               data = &loader_info;
+            } else {
+               // This line looks useful to me, not sure though.
+               data = xstfb->textures[ST_ATTACHMENT_FRONT_LEFT];
+            }
+
+            assert(data);
+
+            xstfb->textures[i] =
+               xstfb->screen->resource_create_drawable(xstfb->screen, &templ, data);
+         } else {
+#endif
+            // merge_requests/16068 tries to get_resource the framebuffer,
+            // but this has no analogues here.
+            xstfb->textures[i] =
+               xstfb->screen->resource_create(xstfb->screen, &templ);
+#ifdef GALLIUM_ZINK
+         }
+#endif
          if (!xstfb->textures[i])
             return FALSE;
       }
