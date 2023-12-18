@@ -115,7 +115,7 @@ static inline void list_delinit(struct list_head *item)
 
 static inline bool list_is_empty(const struct list_head *list)
 {
-   return list->next == list;
+   return list->next == list || list->next == NULL;
 }
 
 static inline bool list_is_linked(const struct list_head *list)

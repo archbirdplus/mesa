@@ -39,6 +39,12 @@
 extern "C" {
 #endif
 
+#if defined(ANDROID) || defined(_WIN32) || defined(__APPLE__)
+#define WITH_XMLCONFIG 0
+#else
+#define WITH_XMLCONFIG 1
+#endif
+
 #define STRING_CONF_MAXLEN 1024
 
 /** \brief Option data types */

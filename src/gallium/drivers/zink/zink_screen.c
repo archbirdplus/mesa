@@ -3135,6 +3135,7 @@ zink_internal_create_screen(const struct pipe_screen_config *config, int64_t dev
    }
 
    screen->instance_info.loader_version = zink_get_loader_version(screen);
+#if WITH_XMLCONFIG
    if (config) {
       driParseConfigFiles(config->options, config->options_info, 0, "zink",
                           NULL, NULL, NULL, 0, NULL, 0);
@@ -3144,6 +3145,7 @@ zink_internal_create_screen(const struct pipe_screen_config *config, int64_t dev
       screen->driconf.emulate_point_smooth = driQueryOptionb(config->options, "zink_emulate_point_smooth");
       screen->driconf.zink_shader_object_enable = driQueryOptionb(config->options, "zink_shader_object_enable");
    }
+#endif
 
    if (!zink_create_instance(screen, dev_major > 0 && dev_major < 255))
       goto fail;

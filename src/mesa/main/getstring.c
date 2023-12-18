@@ -116,6 +116,7 @@ shading_language_version(struct gl_context *ctx)
  * Tries to get the string from dd_function_table::GetString, otherwise returns
  * the hardcoded strings.
  */
+
 const GLubyte * GLAPIENTRY
 _mesa_GetString( GLenum name )
 {

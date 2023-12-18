@@ -86,11 +86,13 @@ kopper_CreateSurface(struct zink_screen *screen, struct kopper_displaytarget *cd
    VkStructureType type = cdt->info.bos.sType;
    switch (type) {
 #ifdef VK_USE_PLATFORM_XCB_KHR
-   case VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR: {
+   case VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR:
+      if (!VKSCR(CreateXcbSurfaceKHR)) {
+         mesa_loge("zink: Vulkan does not support XCB surface");
+      }
       VkXcbSurfaceCreateInfoKHR *xcb = (VkXcbSurfaceCreateInfoKHR *)&cdt->info.bos;
       error = VKSCR(CreateXcbSurfaceKHR)(screen->instance, xcb, NULL, &surface);
       break;
-   }
 #endif
 #ifdef VK_USE_PLATFORM_WAYLAND_KHR
    case VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR: {
@@ -241,6 +243,7 @@ zink_kopper_deinit_displaytarget(struct zink_screen *screen, struct kopper_displ
    cdt->swapchain = cdt->old_swapchain = NULL;
    cdt->surface = VK_NULL_HANDLE;
 }
+
 
 static struct kopper_swapchain *
 kopper_CreateSwapchain(struct zink_screen *screen, struct kopper_displaytarget *cdt, unsigned w, unsigned h, VkResult *result)

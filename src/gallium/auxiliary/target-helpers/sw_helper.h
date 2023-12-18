@@ -78,6 +78,12 @@ sw_screen_create_vk(struct sw_winsys *winsys, const struct pipe_screen_config *c
 #if defined(GALLIUM_D3D12)
       (sw_vk || only_sw) ? "" : "d3d12",
 #endif
+#if defined(GALLIUM_ASAHI)
+      (sw_vk || only_sw) ? "" : "asahi",
+#endif
+#if defined(GALLIUM_ZINK)
+      only_sw ? "" : "zink",
+#endif
 #if defined(GALLIUM_LLVMPIPE)
       "llvmpipe",
 #endif
