@@ -37,6 +37,10 @@
 #include <GL/internal/dri_interface.h>
 #include <vulkan/vulkan_core.h>
 
+#ifdef VK_USE_PLATFORM_METAL_EXT
+#include <vulkan/vulkan_metal.h>
+#endif
+
 typedef struct __DRIkopperExtensionRec          __DRIkopperExtension;
 typedef struct __DRIkopperLoaderExtensionRec    __DRIkopperLoaderExtension;
 typedef struct __DRIkopperDrawableInfoRec    __DRIkopperDrawableInfo;

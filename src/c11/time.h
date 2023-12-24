@@ -50,7 +50,7 @@ extern "C" {
  * On MSVC `struct timespec` and `timespec_get` present at the same time;
  * So detecting `HAVE_STRUCT_TIMESPEC` in meson script dynamically.
  */
-#ifndef HAVE_STRUCT_TIMESPEC
+#if !defined(HAVE_STRUCT_TIMESPEC) && !defined(_STRUCT_TIMESPEC)
 struct timespec
 {
     time_t tv_sec;  // Seconds - >= 0

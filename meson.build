@@ -20,7 +20,7 @@
 
 project(
   'mesa',
-  ['c', 'cpp'],
+  ['c', 'cpp', 'objc'],
   version : files('VERSION'),
   license : 'MIT',
   meson_version : '>= 0.60',
@@ -324,8 +324,10 @@ _platforms = get_option('platforms')
 if _platforms.contains('auto')
   if system_has_kms_drm
     _platforms = ['x11', 'wayland']
-  elif ['darwin', 'cygwin'].contains(host_machine.system())
+  elif ['cygwin'].contains(host_machine.system())
     _platforms = ['x11']
+  elif ['darwin'].contains(host_machine.system())
+    _platforms = ['x11', 'macos']
   elif ['haiku'].contains(host_machine.system())
     _platforms = ['haiku']
   elif host_machine.system() == 'windows'
@@ -341,6 +343,7 @@ with_platform_x11 = _platforms.contains('x11')
 with_platform_wayland = _platforms.contains('wayland')
 with_platform_haiku = _platforms.contains('haiku')
 with_platform_windows = _platforms.contains('windows')
+with_platform_macos = _platforms.contains('macos')
 
 with_glx = get_option('glx')
 if with_glx == 'auto'
@@ -393,8 +396,7 @@ with_xlib_lease = get_option('xlib-lease') \
   .allowed()
 
 with_egl = get_option('egl') \
-  .require(host_machine.system() != 'darwin', error_message : 'EGL not supported on MacOS') \
-  .require(with_platform_windows or with_platform_haiku or with_dri or with_platform_android, error_message : 'EGL requires DRI, Haiku, Windows or Android') \
+  .require(with_platform_macos or with_platform_windows or with_platform_haiku or with_dri or with_platform_android, error_message : 'EGL requires DRI, Haiku, Windows, Android, or MacOS') \
   .require(with_shared_glapi, error_message : 'EGL requires shared-glapi') \
   .require(with_glx != 'xlib', error_message :'EGL requires DRI, but GLX is being built with xlib support') \
   .disable_auto_if(with_platform_haiku) \
@@ -1542,7 +1544,7 @@ endif
 
 # We don't require expat on Android or Windows
 use_xmlconfig = get_option('xmlconfig') \
-  .require(not (with_platform_android or with_platform_windows),
+  .require(not (with_platform_android or with_platform_windows or with_platform_macos),
            error_message : 'xmlconfig not available on Android or Windows') \
   .require(dep_expat.found(),
            error_message : 'requires expat') \

@@ -239,6 +239,14 @@ if with_platform_windows
     subdir('targets/libgl-gdi')
   endif
 endif
+if with_platform_macos
+  subdir('frontends/macos')
+  subdir('winsys/sw/mac')
+  # make sure libGL gets built
+  if with_glx == 'disabled'
+    subdir('targets/libgl-metal')
+  endif
+endif
 if with_tests
   subdir('tests')
 endif

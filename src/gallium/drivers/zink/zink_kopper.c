@@ -71,6 +71,11 @@ init_dt_type(struct kopper_displaytarget *cdt)
       cdt->type = KOPPER_WIN32;
       break;
 #endif
+#ifdef VK_USE_PLATFORM_METAL_EXT
+   case VK_STRUCTURE_TYPE_METAL_SURFACE_CREATE_INFO_EXT:
+      cdt->type = KOPPER_METAL;
+      break;
+#endif
    default:
       unreachable("unsupported!");
    }
@@ -105,6 +110,13 @@ kopper_CreateSurface(struct zink_screen *screen, struct kopper_displaytarget *cd
    case VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR: {
       VkWin32SurfaceCreateInfoKHR *win32 = (VkWin32SurfaceCreateInfoKHR *)&cdt->info.bos;
       error = VKSCR(CreateWin32SurfaceKHR)(screen->instance, win32, NULL, &surface);
+      break;
+   }
+#endif
+#ifdef VK_USE_PLATFORM_METAL_EXT
+   case VK_STRUCTURE_TYPE_METAL_SURFACE_CREATE_INFO_EXT: {
+      VkMetalSurfaceCreateInfoEXT *metal = (VkMetalSurfaceCreateInfoEXT *)&cdt->info.bos;
+      error = VKSCR(CreateMetalSurfaceEXT)(screen->instance, metal, NULL, &surface);
       break;
    }
 #endif
@@ -219,6 +231,13 @@ find_dt_entry(struct zink_screen *screen, const struct kopper_displaytarget *cdt
       break;
    }
 #endif
+#ifdef VK_USE_PLATFORM_METAL_EXT
+   case KOPPER_METAL: {
+      VkMetalSurfaceCreateInfoEXT *metal = (VkMetalSurfaceCreateInfoEXT *)&cdt->info.bos;
+      he = _mesa_hash_table_search(&screen->dts, metal->pLayer);
+      break;
+   }
+#endif
    default:
       unreachable("unsupported!");
    }
@@ -304,6 +323,7 @@ kopper_CreateSwapchain(struct zink_screen *screen, struct kopper_displaytarget *
       cswap->scci.imageExtent.height = cdt->caps.currentExtent.height;
       break;
    case KOPPER_WAYLAND:
+   case KOPPER_METAL:
       /* On Wayland, currentExtent is the special value (0xFFFFFFFF, 0xFFFFFFFF), indicating that the
        * surface size will be determined by the extent of a swapchain targeting the surface. Whatever the
        * application sets a swapchain’s imageExtent to will be the size of the window, after the first image is
@@ -412,6 +432,7 @@ zink_kopper_displaytarget_create(struct zink_screen *screen, unsigned tex_usage,
             break;
          case KOPPER_WAYLAND:
          case KOPPER_WIN32:
+         case KOPPER_METAL:
             _mesa_hash_table_init(&screen->dts, screen, _mesa_hash_pointer, _mesa_key_pointer_equal);
             break;
          default:
@@ -481,6 +502,13 @@ zink_kopper_displaytarget_create(struct zink_screen *screen, unsigned tex_usage,
    case KOPPER_WIN32: {
       VkWin32SurfaceCreateInfoKHR *win32 = (VkWin32SurfaceCreateInfoKHR *)&cdt->info.bos;
       _mesa_hash_table_insert(&screen->dts, win32->hwnd, cdt);
+      break;
+   }
+#endif
+#ifdef VK_USE_PLATFORM_METAL_EXT
+   case KOPPER_METAL: {
+      VkMetalSurfaceCreateInfoEXT *metal = (VkMetalSurfaceCreateInfoEXT *)&cdt->info.bos;
+      _mesa_hash_table_insert(&screen->dts, metal->pLayer, cdt);
       break;
    }
 #endif

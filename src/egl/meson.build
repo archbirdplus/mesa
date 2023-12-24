@@ -156,6 +156,11 @@ elif with_platform_windows
   files_egl += files('drivers/wgl/egl_wgl.c')
   incs_for_egl += [inc_wgl, inc_gallium, inc_gallium_aux, inc_mesa, inc_mapi]
   link_for_egl += libgallium_wgl
+elif with_platform_macos
+  files_egl += files('drivers/macos/egl_macos.m')
+  incs_for_egl += [inc_gallium, inc_gallium_aux, inc_mesa, inc_mapi, include_directories('../mapi', '../mesa', '../gallium/auxiliary', '../gallium/drivers', '../gallium/frontends/macos', '../gallium/winsys/sw/mac')]
+  link_for_egl += [libmesa, libgallium, libmacos, libwsmac]
+  deps_for_egl += [driver_swrast, driver_zink, dependency('Cocoa'), dependency('QuartzCore')]
 endif
 
 if cc.has_function('mincore')

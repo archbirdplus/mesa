@@ -2111,9 +2111,10 @@ retry:
          props3.pNext = props.pNext;
          props.pNext = &props3;
          VKSCR(GetPhysicalDeviceFormatProperties2)(screen->pdev, format, &props);
-         screen->format_props[i].linearTilingFeatures = props3.linearTilingFeatures;
-         screen->format_props[i].optimalTilingFeatures = props3.optimalTilingFeatures;
-         screen->format_props[i].bufferFeatures = props3.bufferFeatures;
+         // shouldn't props3 be updated indirectly?
+         screen->format_props[i].linearTilingFeatures = props.formatProperties.linearTilingFeatures;
+         screen->format_props[i].optimalTilingFeatures = props.formatProperties.optimalTilingFeatures;
+         screen->format_props[i].bufferFeatures = props.formatProperties.bufferFeatures;
          if (props3.linearTilingFeatures & VK_FORMAT_FEATURE_2_LINEAR_COLOR_ATTACHMENT_BIT_NV)
             screen->format_props[i].linearTilingFeatures |= VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
          if (screen->info.have_EXT_image_drm_format_modifier && mod_props.drmFormatModifierCount) {

@@ -41,6 +41,9 @@ bridge_glapi_files += files(
   '../mapi_tmp.h',
 )
 bridge_glapi_files += glapi_mapi_tmp_h
+bridge_glapi_files += [
+    glapitable_h, glapi_mapi_tmp_h, glprocs_h, glapitemp_h
+]
 bridge_glapi_args += [
   '-DMAPI_MODE_BRIDGE',
   '-DMAPI_ABI_HEADER="@0@"'.format(glapi_mapi_tmp_h.full_path()),
