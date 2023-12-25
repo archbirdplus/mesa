@@ -27,17 +27,62 @@ macos_get_st_visual(struct st_visual *visual) {
    // MTLPixelFormatDepth24Unorm_Stencil8 aka depth24Unorm_stencil8
    // However, vulkancapsviewer shows that I only have D32_SFLOAT_S8_UINT
    // which has no mapping in enum pipe_format...
-   // visual->depth_stencil_format = PIPE_FORMAT_Z24_UNORM_S8_UINT;
+   visual->depth_stencil_format = PIPE_FORMAT_Z24_UNORM_S8_UINT;
    // visual->depth_stencil_format = PIPE_FORMAT_Z32_FLOAT;
-   visual->depth_stencil_format = PIPE_FORMAT_Z16_UNORM;
+   // visual->depth_stencil_format = PIPE_FORMAT_Z16_UNORM;
    visual->accum_format = PIPE_FORMAT_NONE;
    visual->samples = 1;
 }
 
 static bool
+macos_st_framebuffer_display(struct pipe_frontend_drawable *drawable,
+                             struct st_context *st,
+                             enum st_attachment_type statt,
+                             struct pipe_box *box) {
+   struct macos_st_framebuffer *macfb = macos_st_framebuffer(drawable);
+   // in my tests, this seems to select BACK_LEFT, although that is
+   // not a front buffer, and only FRONT_RIGHT has a present semaphore...
+   struct pipe_resource *ptex = macfb->textures[statt];
+   // display surface, as defined by its zink swapchain
+   struct pipe_resource *pres;
+   struct pipe_context *pctx = st ? st->pipe : NULL;
+
+   if (!ptex) {
+      printf("framebuffer_display: requested to present NULL texture\n");
+      return true;
+   }
+
+   // xlib has a separate "display resource" for presentation, presumably
+   // in order to send it to the x server manually, but zink
+   // should use its own swapchain that its textures reference
+   pres = ptex;
+
+   // xlib: /* (re)allocate the surface for the texture to be displayed */
+   // no?
+
+   // most of these arguments aren't even used by zink
+   printf("to zink: flush frontbuffer!\n");
+   // this currently fails because zink_kopper_present isn't called;
+   // the "present" semaphore is not defined
+   macfb->screen->flush_frontbuffer(macfb->screen, pctx, pres, 0, 0, macfb->native, NULL);
+}
+
+static bool
 macos_st_framebuffer_flush_front(struct st_context *st,
-   struct pipe_frontend_drawable *drawable, enum st_attachment_type statt) {
-   printf("UNIMPLEMENTED flush the front framebuffer!\n");
+      struct pipe_frontend_drawable *drawable, enum st_attachment_type statt) {
+   struct macos_st_framebuffer *macfb = macos_st_framebuffer(drawable);
+   bool ret;
+
+   if (statt != ST_ATTACHMENT_FRONT_LEFT) {
+      printf("macos flush_front: specified attachment is not FRONT-LEFT!\n");
+      return false;
+   }
+
+   ret = macos_st_framebuffer_display(drawable, st, statt, NULL);
+
+   // TODO: if ret, check if the buffer is resized?
+
+   return ret;
 }
 
 #ifdef GALLIUM_ZINK
@@ -189,10 +234,6 @@ macos_st_framebuffer_validate(struct st_context *st,
            macfb->height != drawableSize.height);
 
    printf("validate: resized: %s\n", resized ? "yes" : "no");
-
-   // check resize?
-   // where does the width/height come from?
-   // width/height come from the size of the base buffer
 
    if (resized || new_mask) {
       // MacOS does not do well with 0 pixel images

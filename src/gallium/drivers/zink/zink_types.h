@@ -94,9 +94,20 @@
 /* flag to create screen->copy_context */
 #define ZINK_CONTEXT_COPY_ONLY (1<<30)
 
+static void NOP() {}
+
+static void *MY_CHECK(void *a, char *funname) {
+   if (a) {
+      return a;
+   } else {
+      printf("Failed to read vk fun pointer %s!\n", funname);
+      return (void *) NOP;
+   }
+}
+
 /* convenience macros for accessing dispatch table functions */
-#define VKCTX(fn) zink_screen(ctx->base.screen)->vk.fn
-#define VKSCR(fn) screen->vk.fn
+#define VKCTX(fn) ((__typeof__(zink_screen(ctx->base.screen)->vk.fn))MY_CHECK((void *)zink_screen(ctx->base.screen)->vk.fn, #fn))
+#define VKSCR(fn) ((__typeof__(screen->vk.fn))MY_CHECK((void *)screen->vk.fn, #fn))
 
 #ifdef __cplusplus
 extern "C" {
